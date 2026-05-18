@@ -61,7 +61,19 @@ Python version is pinned in `.python-version` (3.11). Do not change it without u
 
 ## Tests
 
-Tests live in `tests/` (not yet created). Use `pytest`. Tests must not call external APIs or download datasets; mock or use fixtures. Run with `uv run pytest`.
+Tests live in `tests/`. Run with `uv run pytest`.
+
+```bash
+uv run pytest              # all tests
+uv run pytest -v           # verbose (shows each test name)
+uv run pytest tests/test_metrics.py   # metrics only
+```
+
+Current coverage:
+
+- `tests/test_metrics.py` — 34 tests for `compute_metrics` and `compute_running_stats` in `metrics.py`. Every expected value is derived by hand in the test file. Covers: accuracy, complied/refusal recall and precision, confusion matrix layout, parse error rate breakdown, partial-result handling, NaN for undefined recalls, and a consistency check that `compute_running_stats` on a full result set agrees exactly with `compute_metrics`.
+
+**Constraints:** tests must not call external APIs or download datasets; use `types.SimpleNamespace` or plain fixtures instead of real `JudgeResult` / dataset objects.
 
 ## External references
 
