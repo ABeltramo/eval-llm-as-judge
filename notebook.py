@@ -121,7 +121,7 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
 
     mo.stop(not run_button.value, mo.md("Press **Run evaluation** to start."))
 
-    from eval_llm_as_judge import MulticlassJudge, compute_metrics
+    from eval_llm_as_judge import MulticlassJudge, compute_metrics, compute_running_stats
 
     judge = MulticlassJudge(
         base_url=endpoint.value,
@@ -140,12 +140,30 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
 
     errors: list[dict] = []
 
+    def _live_stats_md(results, records):
+        s = compute_running_stats(results, records)
+        if s is None:
+            return mo.md("*Waiting for first results…*")
+        return mo.md(f"""
+    **Live stats** — {s['n']} / {s['total']} completed
+
+    | Metric | Value |
+    |--------|-------|
+    | Accuracy | {s['accuracy']:.1%} |
+    | Complied recall | {s['complied_recall']:.1%} |
+    | Refusal recall | {s['refusal_recall']:.1%} |
+    | Parse error rate | {s['parse_error_rate']:.1%} |
+    """)
+
+    _update_every = max(1, len(records) // 20)
+
     with ThreadPoolExecutor(max_workers=workers.value) as executor:
         future_to_idx = {
             executor.submit(judge.classify, row.question, row.response): i
             for i, row in enumerate(records)
         }
         results = [None] * len(records)
+        _done_count = 0
         for future in mo.status.progress_bar(
             as_completed(future_to_idx),
             total=len(records),
@@ -157,6 +175,9 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
             except Exception as _exc:
                 errors.append({"index": idx, "question_id": records[idx].question_id, "error": str(_exc)})
                 results[idx] = _error_result
+            _done_count += 1
+            if _done_count % _update_every == 0 or _done_count == len(records):
+                mo.output.replace_at_index(_live_stats_md(results, records), 1)
 
     if errors:
         mo.output.append(

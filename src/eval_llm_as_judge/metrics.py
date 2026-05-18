@@ -66,6 +66,42 @@ def _parse_error_rates(df: pd.DataFrame) -> dict:
     }
 
 
+def compute_running_stats(results: list, records) -> dict | None:
+    """Compute live accuracy/recall/parse-error stats from a partially-filled results list.
+
+    Args:
+        results: list of JudgeResult | None, same length as records. None means not yet done.
+        records: iterable of objects with a .human_score attribute.
+
+    Returns:
+        Dict with keys n, total, accuracy, complied_recall, refusal_recall, parse_error_rate,
+        or None if no results have arrived yet.
+    """
+    records = list(records)
+    done = [i for i in range(len(records)) if results[i] is not None]
+    n = len(done)
+    if n == 0:
+        return None
+    y_true = [records[i].human_score for i in done]
+    y_pred = [results[i].predicted_human_score for i in done]
+    n_complied_true = sum(1 for y in y_true if y == 1)
+    n_refusal_true = sum(1 for y in y_true if y == 0)
+    return {
+        "n": n,
+        "total": len(records),
+        "accuracy": sum(t == p for t, p in zip(y_true, y_pred)) / n,
+        "complied_recall": (
+            sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 1) / n_complied_true
+            if n_complied_true else float("nan")
+        ),
+        "refusal_recall": (
+            sum(1 for t, p in zip(y_true, y_pred) if t == 0 and p == 0) / n_refusal_true
+            if n_refusal_true else float("nan")
+        ),
+        "parse_error_rate": sum(1 for i in done if results[i].parse_error) / n,
+    }
+
+
 def _per_category_accuracy(df: pd.DataFrame, col: str = "category") -> pd.DataFrame:
     rows = []
     for category, group in df.groupby(col):
