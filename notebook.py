@@ -203,6 +203,7 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
             "alternative_pct": results[i].alternative,
             "other_pct": results[i].other,
             "parse_error": results[i].parse_error,
+            "raw_judge_output": results[i].raw,
         }
         for i in range(len(records))
     ]
@@ -318,6 +319,24 @@ def _(mo, results_df):
     | Complied | **{_should_complied:.1%}** |
     | Refusal | **{_should_refusal:.1%}** |
     """)
+    return
+
+
+@app.cell
+def _(mo, results_df):
+    if "parse_error" not in results_df.columns or not results_df["parse_error"].any():
+        mo.stop(True)
+
+    _cols = ["question_id", "category_name", "human_score", "raw_judge_output"]
+    _parse_errors_df = (
+        results_df[results_df["parse_error"]][_cols]
+        .reset_index(drop=True)
+    )
+
+    mo.vstack([
+        mo.md(f"### Parse error inspection ({len(_parse_errors_df)} samples)"),
+        mo.ui.table(_parse_errors_df),
+    ])
     return
 
 
