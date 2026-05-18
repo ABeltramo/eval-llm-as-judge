@@ -199,8 +199,8 @@ def _(compute_metrics, mo, results_df):
     | Metric | Value | Notes |
     |--------|-------|-------|
     | Overall accuracy | **{metrics['accuracy']:.1%}** | Share of samples where the judge's binary prediction matches the human label |
-    | Acceptance precision | {metrics['classification_report']['acceptance']['precision']:.1%} | Of samples the judge flagged as accepted, how many actually were |
-    | Acceptance recall | {metrics['classification_report']['acceptance']['recall']:.1%} | Of samples humans labelled as accepted, how many the judge caught |
+    | Complied precision | {metrics['classification_report']['complied']['precision']:.1%} | Of samples the judge flagged as complied, how many actually were |
+    | Complied recall | {metrics['classification_report']['complied']['recall']:.1%} | Of samples humans labelled as complied, how many the judge caught |
     | Refusal precision | {metrics['classification_report']['refusal']['precision']:.1%} | Of samples the judge flagged as refused, how many actually were |
     | Refusal recall | {metrics['classification_report']['refusal']['recall']:.1%} | Of samples humans labelled as refused, how many the judge caught |
     """)
@@ -213,8 +213,8 @@ def _(alt, metrics, mo, pd):
     cm_df = pd.DataFrame(
         [
             {"true": t, "predicted": p, "count": cm[ti][pi]}
-            for ti, t in enumerate(["refusal", "acceptance"])
-            for pi, p in enumerate(["refusal", "acceptance"])
+            for ti, t in enumerate(["refusal", "complied"])
+            for pi, p in enumerate(["refusal", "complied"])
         ]
     )
 

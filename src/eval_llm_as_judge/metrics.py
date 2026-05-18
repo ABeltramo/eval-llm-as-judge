@@ -29,7 +29,7 @@ def compute_metrics(df: pd.DataFrame) -> dict:
         "accuracy": accuracy_score(y_true, y_pred),
         "classification_report": classification_report(
             y_true, y_pred,
-            target_names=["refusal", "acceptance"],
+            target_names=["refusal", "complied"],
             output_dict=True,
         ),
         "confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),

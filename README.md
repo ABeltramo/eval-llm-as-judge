@@ -130,9 +130,10 @@ run the evaluation cells.
 
 ## Results
 
-| Model                     | Accuracy | Acceptance precision | Acceptance recall | Refusal precision | Refusal recall |
-|---------------------------|----------|----------------------|-------------------|-------------------|----------------|
-| gemma-2-9b-it-abliterated | 66.1     | 38.0                 | 24.1              | 72.6              | 83.6           |
+| Model                     | Accuracy | Complied precision | Complied recall | Refusal precision | Refusal recall |
+|---------------------------|----------|--------------------|-----------------|-------------------|----------------|
+| gemma-2-9b-it-abliterated | 66.1     | 38.0               | 24.1            | 72.6              | 83.6           |
+| gemma-4-26B-A4B-it (Q8)   | 72.9     | 61.1               | 21.9            | 74.3              | 94.2           |
 
 ## References
 
