@@ -1,0 +1,26 @@
+# uv
+.venv/
+uv.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# HuggingFace cache
+.cache/
+
+# Marimo
+__marimo__/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Claude
+.claude

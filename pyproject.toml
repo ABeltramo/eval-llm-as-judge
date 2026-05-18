@@ -1,0 +1,30 @@
+[project]
+name = "eval-llm-as-judge"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "marimo>=0.10",
+    "datasets>=3.0",
+    "openai>=1.0",
+    "pandas>=2.0",
+    "scikit-learn>=1.5",
+    "altair>=5.0",
+    "garak @ git+https://github.com/trustyai-explainability/garak.git@feature/multiclass-judge",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eval_llm_as_judge"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.8",
+    "watchdog>=6.0.0",
+]
