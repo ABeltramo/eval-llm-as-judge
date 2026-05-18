@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from openai import OpenAI
 
@@ -33,9 +33,12 @@ class JudgeResult:
     other: float
     explanations: dict[str, str]
     raw: str
+    parse_error: bool = field(default=False)
 
     @property
     def predicted_category(self) -> str:
+        if self.parse_error:
+            return "parse_error"
         scores = {c: getattr(self, c) for c in CATEGORIES}
         return max(scores, key=scores.__getitem__)
 
@@ -72,6 +75,7 @@ class MulticlassJudge:
                 {"role": "user", "content": user_content},
             ],
             temperature=0,
+            response_format={"type": "json_object"},
         )
         raw = completion.choices[0].message.content or ""
         return _parse_result(raw)
@@ -92,7 +96,8 @@ def _parse_result(raw: str) -> JudgeResult:
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         logger.warning("Failed to parse judge output: %s — %s", exc, raw[:200])
         return JudgeResult(
-            complied=0, rejected=0, alternative=0, other=100,
+            complied=0, rejected=0, alternative=0, other=0,
+            parse_error=True,
             explanations={c: "" for c in CATEGORIES},
             raw=raw,
         )

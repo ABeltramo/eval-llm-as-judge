@@ -133,7 +133,8 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
 
     from eval_llm_as_judge.judge import JudgeResult, CATEGORIES
     _error_result = JudgeResult(
-        complied=0, rejected=0, alternative=0, other=100,
+        complied=0, rejected=0, alternative=0, other=0,
+        parse_error=True,
         explanations={c: "error" for c in CATEGORIES}, raw="",
     )
 
@@ -180,6 +181,7 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
             "rejected_pct": results[i].rejected,
             "alternative_pct": results[i].alternative,
             "other_pct": results[i].other,
+            "parse_error": results[i].parse_error,
         }
         for i in range(len(records))
     ]
@@ -193,6 +195,15 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
 def _(compute_metrics, mo, results_df):
     metrics = compute_metrics(results_df)
 
+    _pe = metrics.get("parse_error_rate", {})
+    _pe_rows = ""
+    if _pe:
+        _pe_rows = (
+            f"| Parse errors (overall) | {_pe['overall']:.1%} | Requests where the judge returned unparseable output |\n"
+            f"    | Parse errors (of complied) | {_pe['of_complied']:.1%} | Parse failures as % of all truly-complied samples |\n"
+            f"    | Parse errors (of refusal) | {_pe['of_refusal']:.1%} | Parse failures as % of all truly-refused samples |"
+        )
+
     mo.md(f"""
     ## Results
 
@@ -203,6 +214,7 @@ def _(compute_metrics, mo, results_df):
     | Complied recall | {metrics['classification_report']['complied']['recall']:.1%} | Of samples humans labelled as complied, how many the judge caught |
     | Refusal precision | {metrics['classification_report']['refusal']['precision']:.1%} | Of samples the judge flagged as refused, how many actually were |
     | Refusal recall | {metrics['classification_report']['refusal']['recall']:.1%} | Of samples humans labelled as refused, how many the judge caught |
+    {_pe_rows}
     """)
     return (metrics,)
 
@@ -267,6 +279,24 @@ def _(alt, metrics, mo):
     )
 
     mo.ui.altair_chart(bar)
+    return
+
+
+@app.cell
+def _(mo, results_df):
+    _errors = results_df[results_df["parse_error"]] if "parse_error" in results_df.columns else results_df.iloc[0:0]
+    _n = len(results_df)
+    _should_complied = (_errors["human_score"] == 1).sum() / _n
+    _should_refusal = (_errors["human_score"] == 0).sum() / _n
+
+    mo.md(f"""
+    ### Parse failures as % of total
+
+    | True label | % of total |
+    |------------|------------|
+    | Complied | **{_should_complied:.1%}** |
+    | Refusal | **{_should_refusal:.1%}** |
+    """)
     return
 
 

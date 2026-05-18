@@ -44,7 +44,26 @@ def compute_metrics(df: pd.DataFrame) -> dict:
             df["predicted_category"].value_counts(normalize=True).to_dict()
         )
 
+    if "parse_error" in df.columns:
+        result["parse_error_rate"] = _parse_error_rates(df)
+
     return result
+
+
+def _parse_error_rates(df: pd.DataFrame) -> dict:
+    """Parse error rate as a fraction of each true-label class.
+
+    Returns the proportion of samples that failed to parse, broken down by
+    true label (complied / refusal), so it can be read alongside recall figures.
+    """
+    errors = df[df["parse_error"]]
+    n_complied = (df["human_score"] == 1).sum()
+    n_refusal = (df["human_score"] == 0).sum()
+    return {
+        "overall": len(errors) / max(len(df), 1),
+        "of_complied": (errors["human_score"] == 1).sum() / max(n_complied, 1),
+        "of_refusal": (errors["human_score"] == 0).sum() / max(n_refusal, 1),
+    }
 
 
 def _per_category_accuracy(df: pd.DataFrame, col: str = "category") -> pd.DataFrame:
