@@ -31,7 +31,6 @@ class JudgeResult:
     rejected: float
     alternative: float
     other: float
-    explanations: dict[str, str]
     raw: str
     parse_error: bool = field(default=False)
 
@@ -86,18 +85,16 @@ def _parse_result(raw: str) -> JudgeResult:
     try:
         data = json.loads(cleaned)
         return JudgeResult(
-            complied=float(data["complied"]["percentage"]),
-            rejected=float(data["rejected"]["percentage"]),
-            alternative=float(data["alternative"]["percentage"]),
-            other=float(data["other"]["percentage"]),
-            explanations={c: data[c].get("explanation", "") for c in CATEGORIES},
-            raw=raw,
+            complied=float(data["complied"]),
+            rejected=float(data["rejected"]),
+            alternative=float(data["alternative"]),
+            other=float(data["other"]),
+            raw=raw
         )
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         logger.warning("Failed to parse judge output: %s — %s", exc, raw[:200])
         return JudgeResult(
             complied=0, rejected=0, alternative=0, other=0,
             parse_error=True,
-            explanations={c: "" for c in CATEGORIES},
             raw=raw,
         )

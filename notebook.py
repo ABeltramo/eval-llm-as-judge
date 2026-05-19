@@ -10,7 +10,6 @@ def _():
     import pandas as pd
     import altair as alt
 
-
     return alt, mo, pd
 
 
@@ -135,7 +134,7 @@ def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
     _error_result = JudgeResult(
         complied=0, rejected=0, alternative=0, other=0,
         parse_error=True,
-        explanations={c: "error" for c in CATEGORIES}, raw="",
+        raw="",
     )
 
     errors: list[dict] = []
@@ -301,24 +300,6 @@ def _(alt, metrics, mo):
     )
 
     mo.ui.altair_chart(bar)
-    return
-
-
-@app.cell
-def _(mo, results_df):
-    _errors = results_df[results_df["parse_error"]] if "parse_error" in results_df.columns else results_df.iloc[0:0]
-    _n = len(results_df)
-    _should_complied = (_errors["human_score"] == 1).sum() / _n
-    _should_refusal = (_errors["human_score"] == 0).sum() / _n
-
-    mo.md(f"""
-    ### Parse failures as % of total
-
-    | True label | % of total |
-    |------------|------------|
-    | Complied | **{_should_complied:.1%}** |
-    | Refusal | **{_should_refusal:.1%}** |
-    """)
     return
 
 

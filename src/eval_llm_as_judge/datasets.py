@@ -14,7 +14,7 @@ def _load_category_map() -> dict[str, str]:
     (category_descriptions_short, 0-indexed, category IDs are 1-indexed strings).
     """
     path = hf_hub_download(
-        repo_id="sorry-bench/sorry-bench-202503",
+        repo_id="sorry-bench/sorry-bench-202406",
         filename="meta_info.py",
         repo_type="dataset",
     )
@@ -52,7 +52,7 @@ def load_merged_dataset(split: str = "test", prompt_style: str | None = None) ->
 
 
 def _load_prompts(prompt_style: str | None = "base") -> pd.DataFrame:
-    ds = load_dataset("sorry-bench/sorry-bench-202503", split="train")
+    ds = load_dataset("sorry-bench/sorry-bench-202406", split="train")
     df = ds.to_pandas()
     # Extract the harmful instruction from the first turn
     df["question"] = df["turns"].apply(lambda t: t[0] if t else "")
