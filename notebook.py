@@ -23,6 +23,12 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    qp = mo.query_params()
+    return (qp,)
+
+
+@app.cell
+def _(mo):
     mo.md("""
     ## Judge endpoint
     """)
@@ -30,11 +36,12 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(mo, qp):
     endpoint = mo.ui.text(
-        value="http://localhost:8000/v1",
+        value=qp.get("endpoint", "http://localhost:8000/v1"),
         label="OpenAI-compatible base URL",
         full_width=True,
+        on_change=lambda v: qp.set("endpoint", v),
     )
     api_key = mo.ui.text(
         value="none",
@@ -43,10 +50,11 @@ def _(mo):
         full_width=True,
     )
     model_name = mo.ui.text(
-        value="",
+        value=qp.get("model_name", ""),
         label="Model name",
         placeholder="e.g. mistral-7b-instruct",
         full_width=True,
+        on_change=lambda v: qp.set("model_name", v),
     )
     mo.vstack([endpoint, api_key, model_name])
     return api_key, endpoint, model_name
@@ -61,11 +69,12 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(mo, qp):
     split = mo.ui.dropdown(
         options=["test", "train", "all"],
-        value="test",
+        value=qp.get("split", "test"),
         label="Human judgment split",
+        on_change=lambda v: qp.set("split", v),
     )
     prompt_style = mo.ui.dropdown(
         options=["all styles", "base", "translate-fr", "authority_endorsement",
@@ -73,22 +82,25 @@ def _(mo):
                  "uncommon_dialects", "expert_endorsement", "role_play", "caesar",
                  "translate-mr", "ascii", "translate-zh-cn", "misrepresentation",
                  "morse", "logical_appeal", "atbash", "slang", "translate-ml"],
-        value="all styles",
+        value=qp.get("prompt_style", "all styles"),
         label="Prompt style",
+        on_change=lambda v: qp.set("prompt_style", v),
     )
     max_samples = mo.ui.slider(
         start=0,
         stop=500,
         step=10,
-        value=0,
+        value=int(qp.get("max_samples", 0)),
         label="Max samples (0 = all)",
+        on_change=lambda v: qp.set("max_samples", v),
     )
     workers = mo.ui.slider(
         start=1,
         stop=32,
         step=1,
-        value=16,
+        value=int(qp.get("workers", 16)),
         label="Parallel workers",
+        on_change=lambda v: qp.set("workers", v),
     )
     mo.hstack([split, prompt_style, max_samples, workers])
     return max_samples, prompt_style, split, workers
