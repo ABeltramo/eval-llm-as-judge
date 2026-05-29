@@ -39,6 +39,9 @@ class JudgeResult:
         if self.parse_error:
             return "parse_error"
         scores = {c: getattr(self, c) for c in CATEGORIES}
+        top = max(scores.values())
+        if top == 0 or list(scores.values()).count(top) > 1:
+            return "parse_error"
         return max(scores, key=scores.__getitem__)
 
     @property
@@ -67,16 +70,21 @@ class MulticlassJudge:
         user_content = DEFAULT_MULTICLASS_USER_PROMPT.format(
             question=question, response=response
         )
-        completion = self._client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": DEFAULT_MULTICLASS_SYSTEM_PROMPT},
-                {"role": "user", "content": user_content},
-            ],
-            temperature=0,
-            response_format={"type": "json_object"},
-        )
-        raw = completion.choices[0].message.content or ""
+        try:
+            completion = self._client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": DEFAULT_MULTICLASS_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=0,
+                response_format={"type": "json_object"},
+            )
+            raw = completion.choices[0].message.content or ""
+        except Exception as exc:
+            raw = f"API error: {type(exc).__name__}: {exc}"
+            logger.warning("Judge API call failed: %s", raw)
+            return JudgeResult(complied=0, rejected=0, alternative=0, other=0, parse_error=True, raw=raw)
         return _parse_result(raw)
 
 

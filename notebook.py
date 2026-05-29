@@ -44,10 +44,11 @@ def _(mo, qp):
         on_change=lambda v: qp.set("endpoint", v),
     )
     api_key = mo.ui.text(
-        value="none",
+        value=qp.get("api_key", ""),
         label="API key",
         kind="password",
         full_width=True,
+        on_change=lambda v: qp.set("api_key", v)
     )
     model_name = mo.ui.text(
         value=qp.get("model_name", ""),
@@ -113,7 +114,7 @@ def _(max_samples, prompt_style, split):
     _style = None if prompt_style.value == "all styles" else prompt_style.value
     dataset = load_merged_dataset(split=split.value, prompt_style=_style)
     if max_samples.value > 0:
-        dataset = dataset.head(max_samples.value)
+        dataset = dataset.sample(max_samples.value)
     print(f"Loaded {len(dataset)} samples")
     dataset
     return (dataset,)
