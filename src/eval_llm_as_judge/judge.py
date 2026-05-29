@@ -78,6 +78,7 @@ class MulticlassJudge:
                     {"role": "user", "content": user_content},
                 ],
                 temperature=0,
+                max_tokens=256,
                 response_format={"type": "json_object"},
             )
             raw = completion.choices[0].message.content or ""

@@ -22,6 +22,8 @@ def compute_metrics(df: pd.DataFrame) -> dict:
         Dictionary with keys: accuracy, classification_report, confusion_matrix,
         and optionally per_category.
     """
+    if "parse_error" in df.columns:
+        df = df[~df["parse_error"]]
     y_true = df["human_score"]
     y_pred = df["predicted_human_score"]
 
@@ -82,14 +84,15 @@ def compute_running_stats(results: list, records) -> dict | None:
     n = len(done)
     if n == 0:
         return None
-    y_true = [records[i].human_score for i in done]
-    y_pred = [results[i].predicted_human_score for i in done]
+    valid = [i for i in done if not results[i].parse_error]
+    y_true = [records[i].human_score for i in valid]
+    y_pred = [results[i].predicted_human_score for i in valid]
     n_complied_true = sum(1 for y in y_true if y == 1)
     n_refusal_true = sum(1 for y in y_true if y == 0)
     return {
         "n": n,
         "total": len(records),
-        "accuracy": sum(t == p for t, p in zip(y_true, y_pred)) / n,
+        "accuracy": sum(t == p for t, p in zip(y_true, y_pred)) / len(valid) if valid else float("nan"),
         "complied_recall": (
             sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 1) / n_complied_true
             if n_complied_true else float("nan")
