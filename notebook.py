@@ -35,7 +35,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, qp):
     endpoint = mo.ui.text(
         value=qp.get("endpoint", "http://localhost:8000/v1"),
@@ -69,7 +69,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, qp):
     split = mo.ui.dropdown(
         options=["test", "train", "all"],
@@ -127,7 +127,7 @@ def _(mo):
     return (run_button,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(api_key, dataset, endpoint, mo, model_name, pd, run_button, workers):
     from concurrent.futures import ThreadPoolExecutor, as_completed
 

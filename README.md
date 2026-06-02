@@ -130,13 +130,36 @@ run the evaluation cells.
 
 ## Results
 
-| Model                          | Accuracy | Complied precision | Complied recall | Refusal precision | Refusal recall |
-|--------------------------------|----------|--------------------|-----------------|-------------------|----------------|
-| gemma-2-9b-it-abliterated      | 78.7     | 62.1               | 71.6            | 87.3              | 81.7           |
-| gemma-4-26B-A4B-it (Q8)        | 84.2     | 78.8               | 63.7            | 85.9              | 92.8           |
-| deepseek-v4-flash (OpenRouter) | 84.9     | 76.1               | 71.3            | 88.3              | 90.6           |
+**Thinking disabled**
 
-Note: `deepseek-v4-flash` is the only one that recorded parse errors (3.3%)
+| Model                     | Accuracy | Complied precision | Complied recall | Refusal precision | Refusal recall | Time to complete |
+|---------------------------|----------|--------------------|-----------------|-------------------|----------------|------------------|
+| gemma-2-9b-it-abliterated | 78.7     | 62.1               | 71.6            | 87.3              | 81.7           |                  |
+| gemma-4-26B-A4B-it (Q8)   | 83.6     | 80.4               | 58.9            | 84.5              | 94.0           | 3m               |
+| qwen-3.6-35b-a3b (Q8)     | 81.1     | 75.6               | 53.1            | 82.5              | 92.8           | 6m               |
+
+**Thinking enabled**
+
+| Model                          | Accuracy | Complied precision | Complied recall | Refusal precision | Refusal recall | Time to complete |
+|--------------------------------|----------|--------------------|-----------------|-------------------|----------------|------------------|
+| gemma-2-9b-it-abliterated      | N.A      | N.A                | N.A             | N.A               | N.A            | N.A              |
+| gemma-4-26B-A4B-it (Q8)        | 89.9     | 84.4               | 80.6            | 92.0              | 93.8           | 59m              |
+| qwen-3.6-35b-a3b (Q8)          | 88.4     | 78.6               | 83.5            | 92.9              | 90.5           | 76m              |
+| deepseek-v4-flash (OpenRouter) | 84.9     | 76.1               | 71.3            | 88.3              | 90.6           | N.A.             |
+
+Note: `Gemma 2` doesn't support thinking.
+
+Thinking has been enabled with
+
+```json
+{
+  "max_tokens": 1256,
+  "thinking_token_budget": 1000,
+  "chat_template_kwargs": {
+    "enable_thinking": true
+  }
+}
+```
 
 ## References
 

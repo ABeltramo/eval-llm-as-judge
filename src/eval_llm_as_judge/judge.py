@@ -78,8 +78,14 @@ class MulticlassJudge:
                     {"role": "user", "content": user_content},
                 ],
                 temperature=0,
-                max_tokens=256,
+                max_tokens=1256,
                 response_format={"type": "json_object"},
+                extra_body={
+                    "thinking_token_budget": 1000,
+                    "chat_template_kwargs": {
+                        "enable_thinking": True
+                    }
+                }
             )
             raw = completion.choices[0].message.content or ""
         except Exception as exc:
